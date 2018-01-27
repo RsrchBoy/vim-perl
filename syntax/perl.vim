@@ -41,11 +41,11 @@ set cpo&vim
 
 " POD starts with ^=<word> and ends with ^=cut
 
-if !exists("perl_include_pod") || perl_include_pod == 1
+if get(g:, 'perl_include_pod', 1)
   " Include a while extra syntax file
   syn include @Pod syntax/pod.vim
   unlet b:current_syntax
-  if exists("perl_fold")
+  if get(g:, 'perl_fold', 1)
     syn region perlPOD start="^=[a-z]" end="^=cut" contains=@Pod,@Spell,perlTodo keepend fold extend
     syn region perlPOD start="^=cut" end="^=cut" contains=perlTodo keepend fold extend
   else
@@ -54,7 +54,7 @@ if !exists("perl_include_pod") || perl_include_pod == 1
   endif
 else
   " Use only the bare minimum of rules
-  if exists("perl_fold")
+  if get(g:, 'perl_fold', 1)
     syn region perlPOD start="^=[a-z]" end="^=cut" fold
   else
     syn region perlPOD start="^=[a-z]" end="^=cut"
@@ -138,38 +138,36 @@ syn match  perlPackageRef	 "[$@#%*&]\%(\%(::\|'\)\=\I\i*\%(\%(::\|'\)\I\i*\)*\)\
 " If you don't want complex things like @{${"foo"}} to be processed,
 " just set the variable "perl_no_extended_vars"...
 
-if !exists("perl_no_scope_in_variables")
-  syn match  perlVarPlain       "\%([@$]\|\$#\)\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
-  syn match  perlVarPlain2                   "%\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
-  syn match  perlFunctionName                "&\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
+if !get(g:, 'perl_no_scope_in_variables', 0)
+  syn match  perlVarPlain       "\%([@$]\|\$#\)\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
+  syn match  perlVarPlain2                   "%\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
+  syn match  perlFunctionName                "&\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" contains=perlPackageRef nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
 else
-  syn match  perlVarPlain       "\%([@$]\|\$#\)\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
-  syn match  perlVarPlain2                   "%\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
-  syn match  perlFunctionName                "&\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref
+  syn match  perlVarPlain       "\%([@$]\|\$#\)\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
+  syn match  perlVarPlain2                   "%\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
+  syn match  perlFunctionName                "&\$*\%(\I\i*\)\=\%(\%(::\|'\)\I\i*\)*\%(::\|\i\@<=\)" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref
 endif
 
 syn match  perlVarPlain2	 "%[-+]"
 
-if !exists("perl_no_extended_vars")
+if !get(g:, 'perl_no_extended_vars', 0)
   syn cluster perlExpr		contains=perlStatementIndirObjWrap,perlStatementScalar,perlStatementRegexp,perlStatementNumeric,perlStatementList,perlStatementHash,perlStatementFiles,perlStatementTime,perlStatementMisc,perlVarPlain,perlVarPlain2,perlVarNotInMatches,perlVarSlash,perlVarBlock,perlVarBlock2,perlShellCommand,perlFloat,perlNumber,perlStringUnexpanded,perlString,perlQQ,perlArrow,perlBraces
-  syn region perlArrow		matchgroup=perlArrow start="->\s*(" end=")" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contained
-  syn region perlArrow		matchgroup=perlArrow start="->\s*\[" end="\]" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contained
-  syn region perlArrow		matchgroup=perlArrow start="->\s*{" end="}" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contained
-  syn match  perlArrow		"->\s*{\s*\I\i*\s*}" contains=perlVarSimpleMemberName nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contained
-  syn region perlArrow		matchgroup=perlArrow start="->\s*\$*\I\i*\s*(" end=")" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contained
-  syn region perlVarBlock	matchgroup=perlVarPlain start="\%($#\|[$@]\)\$*{" skip="\\}" end=+}\|\%(\%(<<\%('\|"\)\?\)\@=\)+ contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn region perlVarBlock2	matchgroup=perlVarPlain start="[%&*]\$*{" skip="\\}" end=+}\|\%(\%(<<\%('\|"\)\?\)\@=\)+ contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn match  perlVarPlain2	"[%&*]\$*{\I\i*}" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn match  perlVarPlain	"\%(\$#\|[@$]\)\$*{\I\i*}" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn region perlVarMember	matchgroup=perlVarPlain start="\%(->\)\={" skip="\\}" end="}" contained contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn match  perlVarSimpleMember	"\%(->\)\={\s*\I\i*\s*}" nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref contains=perlVarSimpleMemberName contained extend
+  syn region perlArrow		matchgroup=perlArrow start="->\s*(" end=")" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref contained
+  syn region perlArrow		matchgroup=perlArrow start="->\s*\[" end="\]" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref contained
+  syn region perlArrow		matchgroup=perlArrow start="->\s*{" end="}" contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref contained
+  syn match  perlArrow		"->\s*{\s*\I\i*\s*}" contains=perlVarSimpleMemberName nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref contained
+  syn region perlVarBlock	matchgroup=perlVarPlain start="\%($#\|[$@]\)\$*{" skip="\\}" end=+}\|\%(\%(<<\%('\|"\)\?\)\@=\)+ contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn region perlVarBlock2	matchgroup=perlVarPlain start="[%&*]\$*{" skip="\\}" end=+}\|\%(\%(<<\%('\|"\)\?\)\@=\)+ contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn match  perlVarPlain2	"[%&*]\$*{\I\i*}" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn match  perlVarPlain	"\%(\$#\|[@$]\)\$*{\I\i*}" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn region perlVarMember	matchgroup=perlVarPlain start="\%(->\)\={" skip="\\}" end="}" contained contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn match  perlVarSimpleMember	"\%(->\)\={\s*\I\i*\s*}" nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref contains=perlVarSimpleMemberName contained extend
   syn match  perlVarSimpleMemberName	"\I\i*" contained
-  syn region perlVarMember	matchgroup=perlVarPlain start="\%(->\)\=\[" skip="\\]" end="]" contained contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlMethod,perlPostDeref extend
-  syn match perlPackageConst	"__PACKAGE__" nextgroup=perlMethod,perlPostDeref
-  syn match  perlMethod		"->\$*\I\i*" contained nextgroup=perlVarSimpleMember,perlVarMember,perlMethod,perlPostDeref
-  syn match  perlPostDeref	"->\%($#\|[$@%&*]\)\*" contained nextgroup=perlVarSimpleMember,perlVarMember,perlMethod,perlPostDeref
-  syn region  perlPostDeref	start="->\%($#\|[$@%&*]\)\[" skip="\\]" end="]" contained contains=@perlExpr nextgroup=perlVarSimpleMember,perlVarMember,perlMethod,perlPostDeref
-  syn region  perlPostDeref	matchgroup=perlPostDeref start="->\%($#\|[$@%&*]\){" skip="\\}" end="}" contained contains=@perlExpr nextgroup=perlVarSimpleMember,perlVarMember,perlMethod,perlPostDeref
+  syn region perlVarMember	matchgroup=perlVarPlain start="\%(->\)\=\[" skip="\\]" end="]" contained contains=@perlExpr nextgroup=perlVarMember,perlVarSimpleMember,perlPostDeref extend
+  syn match perlPackageConst	"__PACKAGE__" nextgroup=perlPostDeref
+  syn match  perlPostDeref	"->\%($#\|[$@%&*]\)\*" contained nextgroup=perlVarSimpleMember,perlVarMember,perlPostDeref
+  syn region  perlPostDeref	start="->\%($#\|[$@%&*]\)\[" skip="\\]" end="]" contained contains=@perlExpr nextgroup=perlVarSimpleMember,perlVarMember,perlPostDeref
+  syn region  perlPostDeref	matchgroup=perlPostDeref start="->\%($#\|[$@%&*]\){" skip="\\}" end="}" contained contains=@perlExpr nextgroup=perlVarSimpleMember,perlVarMember,perlPostDeref
 endif
 
 " File Descriptors
@@ -334,7 +332,7 @@ syn region perlHereDocStart	matchgroup=perlStringStartEnd start=+<<\s*"\z([^\\"]
 syn region perlHereDocStart	matchgroup=perlStringStartEnd start=+<<\s*'\z([^\\']*\%(\\.[^\\']*\)*\)'+ end=+$+ contains=@perlTop oneline
 syn region perlHereDocStart	matchgroup=perlStringStartEnd start=+<<\s*""+       end=+$+     contains=@perlTop oneline
 syn region perlHereDocStart	matchgroup=perlStringStartEnd start=+<<\s*''+       end=+$+     contains=@perlTop oneline
-if exists("perl_fold")
+if get(g:, 'perl_fold', 0)
   syn region perlHereDoc	start=+<<\z(\I\i*\)+ matchgroup=perlStringStartEnd      end=+^\z1$+ contains=perlHereDocStart,@perlInterpDQ fold extend
   syn region perlHereDoc	start=+<<\s*"\z([^\\"]*\%(\\.[^\\"]*\)*\)"+ matchgroup=perlStringStartEnd end=+^\z1$+ contains=perlHereDocStart,@perlInterpDQ fold extend
   syn region perlHereDoc	start=+<<\s*'\z([^\\']*\%(\\.[^\\']*\)*\)'+ matchgroup=perlStringStartEnd end=+^\z1$+ contains=perlHereDocStart,@perlInterpSQ fold extend
@@ -394,7 +392,7 @@ syn match  perlFormatField	"@[^A-Za-z_|<>~#*]"me=e-1 contained
 syn match  perlFormatField	"@$" contained
 
 " __END__ and __DATA__ clauses
-if exists("perl_fold")
+if get(g:, 'perl_fold', 0)
   syntax region perlDATA		start="^__DATA__$" skip="." end="." contains=@perlDATA fold
   syntax region perlDATA		start="^__END__$" skip="." end="." contains=perlPOD,@perlDATA fold
 else
@@ -405,13 +403,14 @@ endif
 "
 " Folding
 
-if exists("perl_fold")
+if get(g:, 'perl_fold', 0)
   " Note: this bit must come before the actual highlighting of the "package"
   " keyword, otherwise this will screw up Pod lines that match /^package/
-  if !exists("perl_nofold_packages")
+  if !get(g:, 'perl_nofold_packages', 0)
     syn region perlPackageFold start="^package \S\+;\s*\%(#.*\)\=$" end="^1;\=\s*\%(#.*\)\=$" end="\n\+package"me=s-1 transparent fold keepend
+    syn region perlPackageFold start="^\z(\s*\)package\s*\S\+\s*{" end="^\z1}" transparent fold keepend
   endif
-  if !exists("perl_nofold_subs")
+  if !get(g:, 'perl_nofold_subs', 0)
     if get(g:, "perl_fold_anonymous_subs", 0)
       syn region perlSubFold start="\<sub\>[^{]*{" end="}" transparent fold keepend extend
       syn region perlSubFold start="\<\%(BEGIN\|END\|CHECK\|INIT\)\>\s*{" end="}" transparent fold keepend
@@ -421,7 +420,7 @@ if exists("perl_fold")
     endif
   endif
 
-  if exists("perl_fold_blocks")
+  if get(g:, 'perl_fold_blocks', 0)
     syn region perlBlockFold start="^\z(\s*\)\%(if\|elsif\|unless\|for\|while\|until\|given\)\s*(.*)\%(\s*{\)\=\s*\%(#.*\)\=$" start="^\z(\s*\)for\%(each\)\=\s*\%(\%(my\|our\)\=\s*\S\+\s*\)\=(.*)\%(\s*{\)\=\s*\%(#.*\)\=$" end="^\z1}\s*;\=\%(#.*\)\=$" transparent fold keepend
     syn region perlBlockFold start="^\z(\s*\)\%(do\|else\)\%(\s*{\)\=\s*\%(#.*\)\=$" end="^\z1}\s*while" end="^\z1}\s*;\=\%(#.*\)\=$" transparent fold keepend
   endif
@@ -433,140 +432,137 @@ else
   syn sync minlines=0
 endif
 
-command -nargs=+ HiLink hi def link <args>
-
 " NOTE: If you're linking new highlight groups to perlString, please also put
 "       them into b:match_skip in ftplugin/perl.vim.
 
 " The default highlighting.
-HiLink perlSharpBang		PreProc
-HiLink perlControl		PreProc
-HiLink perlInclude		Include
-HiLink perlSpecial		Special
-HiLink perlString		String
-HiLink perlCharacter		Character
-HiLink perlNumber		Number
-HiLink perlFloat		Float
-HiLink perlType			Type
-HiLink perlIdentifier		Identifier
-HiLink perlLabel		Label
-HiLink perlStatement		Statement
-HiLink perlConditional		Conditional
-HiLink perlRepeat		Repeat
-HiLink perlOperator		Operator
-HiLink perlFunction		Keyword
-HiLink perlSubName		Function
-HiLink perlSubPrototype		Type
-HiLink perlSignature		Type
-HiLink perlSubAttributes	PreProc
-HiLink perlSubAttributesCont	perlSubAttributes
-HiLink perlComment		Comment
-HiLink perlTodo			Todo
-if exists("perl_string_as_statement")
-  HiLink perlStringStartEnd	perlStatement
+hi def link perlSharpBang		PreProc
+hi def link perlControl		PreProc
+hi def link perlInclude		Include
+hi def link perlSpecial		Special
+hi def link perlString		String
+hi def link perlCharacter		Character
+hi def link perlNumber		Number
+hi def link perlFloat		Float
+hi def link perlType			Type
+hi def link perlIdentifier		Identifier
+hi def link perlLabel		Label
+hi def link perlStatement		Statement
+hi def link perlConditional		Conditional
+hi def link perlRepeat		Repeat
+hi def link perlOperator		Operator
+hi def link perlFunction		Keyword
+hi def link perlSubName		Function
+hi def link perlSubPrototype		Type
+hi def link perlSignature		Type
+hi def link perlSubAttributes	PreProc
+hi def link perlSubAttributesCont	perlSubAttributes
+hi def link perlComment		Comment
+hi def link perlTodo			Todo
+if get(g:, 'perl_string_as_statement', 0)
+  hi def link perlStringStartEnd	perlStatement
 else
-  HiLink perlStringStartEnd	perlString
+  hi def link perlStringStartEnd	perlString
 endif
-HiLink perlVStringV		perlStringStartEnd
-HiLink perlList			perlStatement
-HiLink perlMisc			perlStatement
-HiLink perlVarPlain		perlIdentifier
-HiLink perlVarPlain2		perlIdentifier
-HiLink perlArrow		perlIdentifier
-HiLink perlFiledescRead		perlIdentifier
-HiLink perlFiledescStatement	perlIdentifier
-HiLink perlVarSimpleMember	perlIdentifier
-HiLink perlVarSimpleMemberName 	perlString
-HiLink perlVarNotInMatches	perlIdentifier
-HiLink perlVarSlash		perlIdentifier
-HiLink perlQQ			perlString
-HiLink perlHereDoc		perlString
-HiLink perlStringUnexpanded	perlString
-HiLink perlSubstitutionSQ	perlString
-HiLink perlSubstitutionGQQ	perlString
-HiLink perlTranslationGQ	perlString
-HiLink perlMatch		perlString
-HiLink perlMatchStartEnd	perlStatement
-HiLink perlFormatName		perlIdentifier
-HiLink perlFormatField		perlString
-HiLink perlPackageDecl		perlType
-HiLink perlStorageClass		perlType
-HiLink perlPackageRef		perlType
-HiLink perlStatementPackage	perlStatement
-HiLink perlStatementStorage	perlStatement
-HiLink perlStatementControl	perlStatement
-HiLink perlStatementScalar	perlStatement
-HiLink perlStatementRegexp	perlStatement
-HiLink perlStatementNumeric	perlStatement
-HiLink perlStatementList	perlStatement
-HiLink perlStatementHash	perlStatement
-HiLink perlStatementIOfunc	perlStatement
-HiLink perlStatementFiledesc	perlStatement
-HiLink perlStatementVector	perlStatement
-HiLink perlStatementFiles	perlStatement
-HiLink perlStatementFlow	perlStatement
-HiLink perlStatementInclude	perlStatement
-HiLink perlStatementProc	perlStatement
-HiLink perlStatementSocket	perlStatement
-HiLink perlStatementIPC		perlStatement
-HiLink perlStatementNetwork	perlStatement
-HiLink perlStatementPword	perlStatement
-HiLink perlStatementTime	perlStatement
-HiLink perlStatementMisc	perlStatement
-HiLink perlStatementIndirObj	perlStatement
-HiLink perlFunctionName		perlIdentifier
-HiLink perlMethod		perlIdentifier
-HiLink perlPostDeref		perlIdentifier
-HiLink perlFunctionPRef		perlType
+hi def link perlVStringV		perlStringStartEnd
+hi def link perlList			perlStatement
+hi def link perlMisc			perlStatement
+hi def link perlVarPlain		perlIdentifier
+hi def link perlVarPlain2		perlIdentifier
+hi def link perlArrow		perlIdentifier
+hi def link perlFiledescRead		perlIdentifier
+hi def link perlFiledescStatement	perlIdentifier
+hi def link perlVarSimpleMember	perlIdentifier
+hi def link perlVarSimpleMemberName 	perlString
+hi def link perlVarNotInMatches	perlIdentifier
+hi def link perlVarSlash		perlIdentifier
+hi def link perlQQ			perlString
+hi def link perlHereDoc		perlString
+hi def link perlStringUnexpanded	perlString
+hi def link perlSubstitutionSQ	perlString
+hi def link perlSubstitutionGQQ	perlString
+hi def link perlTranslationGQ	perlString
+hi def link perlMatch		perlString
+hi def link perlMatchStartEnd	perlStatement
+hi def link perlFormatName		perlIdentifier
+hi def link perlFormatField		perlString
+hi def link perlPackageDecl		perlType
+hi def link perlStorageClass		perlType
+hi def link perlPackageRef		perlType
+hi def link perlStatementPackage	perlStatement
+hi def link perlStatementStorage	perlStatement
+hi def link perlStatementControl	perlStatement
+hi def link perlStatementScalar	perlStatement
+hi def link perlStatementRegexp	perlStatement
+hi def link perlStatementNumeric	perlStatement
+hi def link perlStatementList	perlStatement
+hi def link perlStatementHash	perlStatement
+hi def link perlStatementIOfunc	perlStatement
+hi def link perlStatementFiledesc	perlStatement
+hi def link perlStatementVector	perlStatement
+hi def link perlStatementFiles	perlStatement
+hi def link perlStatementFlow	perlStatement
+hi def link perlStatementInclude	perlStatement
+hi def link perlStatementProc	perlStatement
+hi def link perlStatementSocket	perlStatement
+hi def link perlStatementIPC		perlStatement
+hi def link perlStatementNetwork	perlStatement
+hi def link perlStatementPword	perlStatement
+hi def link perlStatementTime	perlStatement
+hi def link perlStatementMisc	perlStatement
+hi def link perlStatementIndirObj	perlStatement
+hi def link perlFunctionName		perlIdentifier
+hi def link perlMethod		perlIdentifier
+hi def link perlPostDeref		perlIdentifier
+hi def link perlFunctionPRef		perlType
+
 if !get(g:, 'perl_include_pod', 1)
-  HiLink perlPOD		perlComment
+  hi def link perlPOD		perlComment
 endif
-HiLink perlShellCommand		perlString
-HiLink perlSpecialAscii		perlSpecial
-HiLink perlSpecialDollar	perlSpecial
-HiLink perlSpecialString	perlSpecial
-HiLink perlSpecialStringU	perlSpecial
-HiLink perlSpecialMatch		perlSpecial
-HiLink perlDATA			perlComment
+hi def link perlShellCommand		perlString
+hi def link perlSpecialAscii		perlSpecial
+hi def link perlSpecialDollar	perlSpecial
+hi def link perlSpecialString	perlSpecial
+hi def link perlSpecialStringU	perlSpecial
+hi def link perlSpecialMatch		perlSpecial
+hi def link perlDATA			perlComment
 
 " NOTE: Due to a bug in Vim (or more likely, a misunderstanding on my part),
 "       I had to remove the transparent property from the following regions
 "       in order to get them to highlight correctly.  Feel free to remove
 "       these and reinstate the transparent property if you know how.
-HiLink perlParensSQ		perlString
-HiLink perlBracketsSQ		perlString
-HiLink perlBracesSQ		perlString
-HiLink perlAnglesSQ		perlString
+hi def link perlParensSQ		perlString
+hi def link perlBracketsSQ		perlString
+hi def link perlBracesSQ		perlString
+hi def link perlAnglesSQ		perlString
 
-HiLink perlParensDQ		perlString
-HiLink perlBracketsDQ		perlString
-HiLink perlBracesDQ		perlString
-HiLink perlAnglesDQ		perlString
+hi def link perlParensDQ		perlString
+hi def link perlBracketsDQ		perlString
+hi def link perlBracesDQ		perlString
+hi def link perlAnglesDQ		perlString
 
-HiLink perlSpecialStringU2	perlString
+hi def link perlSpecialStringU2	perlString
 
 " Possible errors
-HiLink perlNotEmptyLine		Error
-HiLink perlElseIfError		Error
-HiLink perlSubPrototypeError	Error
-HiLink perlSubError		Error
-
-delcommand HiLink
+hi def link perlNotEmptyLine		Error
+hi def link perlElseIfError		Error
+hi def link perlSubPrototypeError	Error
+hi def link perlSubError		Error
 
 " Syncing to speed up processing
 "
-if !exists("perl_no_sync_on_sub")
+if !get(g:, 'perl_no_sync_on_sub', 0)
   syn sync match perlSync	grouphere NONE "^\s*\<package\s"
   syn sync match perlSync	grouphere NONE "^\s*\<sub\>"
   syn sync match perlSync	grouphere NONE "^}"
 endif
 
-if !exists("perl_no_sync_on_global_var")
+if !get(g:, 'perl_no_sync_on_global_var', 0)
   syn sync match perlSync	grouphere NONE "^$\I[[:alnum:]_:]+\s*=\s*{"
   syn sync match perlSync	grouphere NONE "^[@%]\I[[:alnum:]_:]+\s*=\s*("
 endif
 
-if exists("perl_sync_dist")
+if get(g:, 'perl_sync_dist', 0)
   execute "syn sync maxlines=" . perl_sync_dist
 else
   syn sync maxlines=100
