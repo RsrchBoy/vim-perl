@@ -55,9 +55,9 @@ if !exists("b:tt2_syn_inc_perl")
     let b:tt2_syn_inc_perl = 1
 endif
 
-if exists("b:current_syntax")
-  finish
-endif
+" if exists("b:current_syntax")
+"   finish
+" endif
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -202,7 +202,12 @@ if exists("b:tt2_syn_tags")
     unlet b:tt2_syn_tags
 endif
 
-let b:current_syntax = "tt2"
+" let b:current_syntax = "tt2"
+if has_key(b:, 'current_syntax')
+    let b:current_syntax .= ".tt2"
+else
+    let b:current_syntax = "tt2"
+endif
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
