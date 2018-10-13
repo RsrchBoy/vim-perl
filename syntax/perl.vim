@@ -64,7 +64,8 @@ endif
 
 syn cluster perlTop		contains=TOP
 
-syn region perlBraces start="{" end="}" transparent extend
+" This causes trouble with fenced code block highlighting in markdown.  Hm.
+" syn region perlBraces start="{" end="}" transparent extend
 
 " All keywords
 "
@@ -370,7 +371,7 @@ else
     syn match perlSubPrototype +(\_[^)]*)\_s*+ nextgroup=perlSubAttributes,perlComment contained contains=perlSubPrototypeError
 endif
 
-syn match perlSubName +\%(\h\|::\|'\w\)\%(\w\|::\|'\w\)*\_s*\|+ contained nextgroup=perlSubPrototype,perlSignature,perlSubAttributes,perlComment
+syn match perlSubName +\%(\h\|::\|'\w\)\%(\w\|::\|'\w\)*\ze\_s*\|+ contained skipwhite nextgroup=perlSubPrototype,perlSignature,perlSubAttributes,perlComment
 
 syn match perlFunction +\<sub\>\_s*+ nextgroup=perlSubName
 
